@@ -7,7 +7,13 @@ add_executable(NetServer WIN32
         NetServer.cpp
 )
 
-set ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS" ) 
+# 检测平台
+if (WIN32)
+    # 设置链接器标志以使用 Windows 子系统
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
+elseif (UNIX)
+    # Linux 平台下的链接器标志（默认情况不需要特别设置）
+endif()
 target_link_libraries(NetServer EngineLib EngineDLL)
 #target_link_libraries(NetServer EngineDLL )
 

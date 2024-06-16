@@ -35,12 +35,12 @@ message(${CMAKE_CXX_FLAGS})
 
 
 SET(ASIO_INCLUDE 
-    "F:/Apps/asio_1_30_2/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/asio_1_30_2/include"
 )
 
 SET(
     BINARY_ROOT_DIR
-    "/bin"
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin"
 )
 
 
