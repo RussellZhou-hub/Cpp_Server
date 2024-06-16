@@ -38,6 +38,10 @@ SET(ASIO_INCLUDE
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/asio_1_30_2/include"
 )
 
+SET(Common_INCLUDE
+    "${CMAKE_CURRENT_SOURCE_DIR}/NetCommonLib"
+)
+
 SET(
     BINARY_ROOT_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/bin"
