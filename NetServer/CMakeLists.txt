@@ -16,7 +16,7 @@ elseif (UNIX)
 endif()
 #target_link_libraries(NetServer EngineDLL )
 
-list(APPEND CMAKE_CXX_FLAGS_DEBUG /MTd)
+
 
 #if(MSVC)
 #    target_link_options(NetServer PUBLIC /DEBUG)
@@ -25,10 +25,15 @@ list(APPEND CMAKE_CXX_FLAGS_DEBUG /MTd)
 include_directories (${Common_INCLUDE})
 
 if(MSVC)
+    list(APPEND CMAKE_CXX_FLAGS_DEBUG /MTd)
     set_property(TARGET NetServer APPEND PROPERTY LINK_FLAGS_DEBUG /DEBUG)
 	  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGEDITOR} /ZI /MP")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGEDITOR} /MDd  /LIBPATH:\"${ATLDIR}\"")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUGGAME} /MDd")
 endif()
 
-target_link_directories(NetServer PRIVATE ${ATLDIR})
+target_link_directories(NetServer PRIVATE 
+    ${ATLDIR}
+)
+
+target_link_libraries(NetServer pthread)

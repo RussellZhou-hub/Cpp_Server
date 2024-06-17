@@ -23,11 +23,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions("-D_DEBUG")
 endif()
 
-
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")  # no exception
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")  # no Runtime Type Information
-
 #set(CMAKE_CXX_FLAGS_DEBUGEDITOR "${CMAKE_CXX_FLAGS_DEBUG} -g ")  # 调试信息
 list(APPEND CMAKE_CXX_FLAGS_DEBUGEDITOR "-g")
 
@@ -44,7 +39,7 @@ SET(Common_INCLUDE
 
 SET(
     BINARY_ROOT_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/"
 )
 
 
