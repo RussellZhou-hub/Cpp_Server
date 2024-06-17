@@ -65,3 +65,4 @@ include_directories (${ASIO_INCLUDE})
 
 add_subdirectory(NetCommonLib)
 add_subdirectory(NetServer)
+add_subdirectory(NetClient)
