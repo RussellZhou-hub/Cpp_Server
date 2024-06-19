@@ -4,7 +4,8 @@ project("NetServer" LANGUAGES CXX)
 add_definitions("-DUNICODE" "-D_UNICODE")
 
 add_executable(NetServer WIN32
-        NetServer.cpp
+    db_connector.h
+    NetServer.cpp
 )
 
 # 检测平台
@@ -36,4 +37,7 @@ target_link_directories(NetServer PRIVATE
     ${ATLDIR}
 )
 
-target_link_libraries(NetServer pthread)
+target_link_libraries(NetServer 
+    pthread
+    mariadbclient
+)

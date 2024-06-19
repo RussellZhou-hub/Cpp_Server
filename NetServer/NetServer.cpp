@@ -56,6 +56,7 @@
 
 #include <iostream>
 #include <olc_net.h>
+#include "db_connector.h"
 
 enum class CustomMsgTypes : uint32_t
 {
@@ -125,6 +126,33 @@ int main()
 {
 	CustomServer server(60000);
 	server.Start();
+
+	// for test connect to mariaDB
+	MYSQL *con;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+
+	struct connection_details mysqlD;
+	mysqlD.server="localhost";
+	mysqlD.user="root";
+	mysqlD.password="$Kb23232323";
+	mysqlD.database = "project_star";
+
+	con = mysql_connection_setup(mysqlD);
+	res = mysql_execute_query(con,"select * from tb_Users;");
+
+	std::cout<< "Displaying database output:\n" << std::endl;
+
+	std::cout<<"----------------------------------------------------------------------------------\n";
+	while((row = mysql_fetch_row(res) ) !=NULL)
+	{
+		std::cout<<row[0]<< " | "<<row[1]<< " | "<<row[2]<< " | "<<row[3]<< " | "<<row[4]<< " | ";
+		std::cout<<std::endl;
+	}
+	std::cout<<"----------------------------------------------------------------------------------\n";
+
+	mysql_free_result(res);
+	mysql_close(con);
 
 	while (1)
 	{
