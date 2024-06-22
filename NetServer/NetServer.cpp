@@ -57,6 +57,9 @@
 #include <iostream>
 #include <olc_net.h>
 #include "db_connector.h"
+#include "net_http_server.h"
+
+using asio::ip::tcp;
 
 enum class CustomMsgTypes : uint32_t
 {
@@ -124,8 +127,8 @@ protected:
 
 int main()
 {
-	CustomServer server(60000);
-	server.Start();
+	// CustomServer server(60000);
+	// server.Start();
 
 	// for test connect to mariaDB
 	MYSQL *con;
@@ -154,10 +157,30 @@ int main()
 	mysql_free_result(res);
 	mysql_close(con);
 
-	while (1)
-	{
-		server.Update(-1, true);
-	}
+	// while (1)
+	// {
+	// 	server.Update(-1, true);
+	// }
+
+	try {
+        asio::io_context io_context;
+
+        // Listen on port 60000
+        tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 60000));
+
+        std::cout << "Server is running on port 60000..." << std::endl;
+
+        for (;;) {
+            tcp::socket socket(io_context);
+            acceptor.accept(socket);
+
+            handle_request(socket);
+        }
+    } catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    }
+
+    return 0;
 
 
 

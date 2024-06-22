@@ -4,19 +4,27 @@ project("NetCommonLib" LANGUAGES CXX)
 
 add_definitions("-DUNICODE" "-D_UNICODE")
 
-
-add_library(NetCommonLib STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/framework.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/MMO_Common.h
-	${CMAKE_CURRENT_SOURCE_DIR}/net_client.h		
-	${CMAKE_CURRENT_SOURCE_DIR}/net_common.h
-	${CMAKE_CURRENT_SOURCE_DIR}/net_connection.h
-	${CMAKE_CURRENT_SOURCE_DIR}/net_message.h
-	${CMAKE_CURRENT_SOURCE_DIR}/net_server.h
-	${CMAKE_CURRENT_SOURCE_DIR}/net_tsqueue.h
-	${CMAKE_CURRENT_SOURCE_DIR}/NetCommon.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/olc_net.h
+# 自动扫描并包含当前目录中的所有源文件
+file(GLOB_RECURSE NetCommonLib_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
 )
+
+# 添加静态库
+add_library(NetCommonLib STATIC ${NetCommonLib_SOURCES})
+
+# add_library(NetCommonLib STATIC
+#     ${CMAKE_CURRENT_SOURCE_DIR}/framework.h
+#     ${CMAKE_CURRENT_SOURCE_DIR}/MMO_Common.h
+# 	${CMAKE_CURRENT_SOURCE_DIR}/net_client.h		
+# 	${CMAKE_CURRENT_SOURCE_DIR}/net_common.h
+# 	${CMAKE_CURRENT_SOURCE_DIR}/net_connection.h
+# 	${CMAKE_CURRENT_SOURCE_DIR}/net_message.h
+# 	${CMAKE_CURRENT_SOURCE_DIR}/net_server.h
+# 	${CMAKE_CURRENT_SOURCE_DIR}/net_tsqueue.h
+# 	${CMAKE_CURRENT_SOURCE_DIR}/NetCommon.cpp
+# 	${CMAKE_CURRENT_SOURCE_DIR}/olc_net.h
+# )
 
 SET_TARGET_PROPERTIES(NetCommonLib
         PROPERTIES
