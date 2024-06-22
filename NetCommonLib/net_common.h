@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <map>
+#include <unordered_map>
 
 #ifdef _WIN32
 #ifndef _WIN32_WINNT

@@ -164,6 +164,15 @@ int main()
 
 	try {
         asio::io_context io_context;
+        AsyncHttpServer server(io_context, 60000); // 使用指定端口号，例如60000
+		std::cout << "Server is running on port "<< server.getPort() <<" ......" << std::endl;
+        io_context.run();
+    } catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    }
+
+	try {
+        asio::io_context io_context;
 
         // Listen on port 60000
         tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 60000));
@@ -179,10 +188,6 @@ int main()
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }
-
-    return 0;
-
-
 
 	return 0;
 }
