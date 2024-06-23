@@ -108,10 +108,16 @@ void handle_request(tcp::socket& socket) {
 
 class AsyncHttpServer {
 public:
-    AsyncHttpServer(asio::io_context& io_context, short port)
+    AsyncHttpServer(asio::io_context& io_context, int port)
         : acceptor_(io_context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)),
           socket_(io_context),port_(port) {
+        ConnectDatabase();
         StartAccept();
+    }
+
+    ~AsyncHttpServer()
+    {
+        DisconnectDatabase();
     }
 
     int getPort()
@@ -124,16 +130,50 @@ private:
         acceptor_.async_accept(socket_,
             [this](std::error_code ec) {
                 if (!ec) {
-                    std::make_shared<Session>(std::move(socket_))->Start();
+                    std::make_shared<Session>(std::move(socket_),con)->Start();
                 }
                 StartAccept();
             });
     }
 
+    void ConnectDatabase()
+    {
+        mysqlD.server="localhost";
+	    mysqlD.user="root";
+	    mysqlD.password="$Kb23232323";
+	    mysqlD.database = "project_star";
+
+	    con = mysql_connection_setup(mysqlD);
+	    res = mysql_execute_query(con,"select * from tb_Users;");
+        if(res==nullptr)
+        {
+            std::cout<<"failed to connect database!\n";
+            return;
+        }
+
+        std::cout<< "Displaying database output:\n" << std::endl;
+
+	    std::cout<<"----------------------------------------------------------------------------------\n";
+        std::cout<<"username"<< " | "<<"password"<< " | "<<"phone"<< " | "<<"email"<< " | "<<"created_at"<< " | \n";
+        std::cout<<"----------------------------------------------------------------------------------\n";
+	    while((row = mysql_fetch_row(res) ) !=NULL)
+	    {
+		    std::cout<<row[0]<< " | "<<row[1]<< " | "<<row[2]<< " | "<<row[3]<< " | "<<row[4]<< " | ";
+		    std::cout<<std::endl;
+	    }
+	    std::cout<<"----------------------------------------------------------------------------------\n";
+    }
+
+    void DisconnectDatabase()
+    {
+        mysql_free_result(res);
+	    mysql_close(con);
+    }
+
     class Session : public std::enable_shared_from_this<Session> {
     public:
-        Session(asio::ip::tcp::socket socket)
-            : socket_(std::move(socket)) {
+        Session(asio::ip::tcp::socket socket,MYSQL* connect)
+            : socket_(std::move(socket)),con(connect) {
         }
 
         void Start() {
@@ -172,6 +212,12 @@ private:
                 std::string path = request.substr(method_end + 1, path_end - method_end - 1);
 
                 //std::cout << "\n params line:\n" << path << std::endl;
+                if(path.length()<=2)
+                {
+                    std::string response_content = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
+                    WriteResponse(response_content);
+                    return;
+                }
 
 
                 // Parse query parameters
@@ -187,6 +233,25 @@ private:
                 std::string response_content = "{";
                 for (const auto& param : query_params) {
                     response_content += "\"" + param.first + "\": \"" + param.second + "\", ";
+                }
+
+                bool isUser_exist=ValidateUser(query_params["username"] , query_params["password"]) ;
+
+                if(isUser_exist)
+                {
+                    response_content += "\"";
+                    response_content += "is_user_exist";
+                    response_content +="\": \"";
+                    response_content += "yes";
+                    response_content += "\", ";
+                }
+                else
+                {
+                    response_content += "\"";
+                    response_content += "is_user_exist";
+                    response_content +="\": \"";
+                    response_content += "no";
+                    response_content += "\", ";
                 }
 
                 // delete extra ", "
@@ -226,11 +291,92 @@ private:
                 });
         }
 
+        bool ValidateUser(const std::string& username, const std::string& password) 
+        {
+            // sql::mysql::MySQL_Driver* driver = sql::mysql::get_mysql_driver_instance();
+            // std::unique_ptr<sql::Connection> conn(driver->connect("tcp://127.0.0.1:3306", "user", "password"));
+            // conn->setSchema("database");
+
+            // std::unique_ptr<sql::PreparedStatement> stmt(conn->prepareStatement("SELECT * FROM users WHERE username = ? AND password = ?"));
+            // stmt->setString(1, username);
+            // stmt->setString(2, password);
+
+            // std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+            // return res->next();
+            if(con==nullptr)
+            {
+                std::cout<<"not to connect database!\n";
+                return false;
+            }
+            MYSQL_RES *res;
+	        MYSQL_ROW row;
+            std::string query_sql("select * from tb_Users where username = \"");
+            query_sql+=username;
+            query_sql+="\" and password = \"";
+            query_sql+=password;
+            query_sql+="\";";
+            std::cout<<" sql: "<<query_sql<<"\n";
+            res = mysql_execute_query(con,query_sql.c_str());
+            if(res==nullptr)
+            {
+                std::cout<<"failed to connect database!\n";
+                return false;
+            }
+
+            std::cout<< "Displaying database output:\n" << std::endl;
+
+	        std::cout<<"----------------------------------------------------------------------------------\n";
+            std::cout<<"username"<< " | "<<"password"<< " | "<<"phone"<< " | "<<"email"<< " | "<<"created_at"<< " | \n";
+            std::cout<<"----------------------------------------------------------------------------------\n";
+
+            // see if exist any row
+            if((row = mysql_fetch_row(res) ) ==NULL)
+            {
+                return false;
+            }
+            else
+            {
+                std::cout<<row[0]<< " | "<<row[1]<< " | "<<row[2]<< " | "<<row[3]<< " | "<<row[4]<< " | ";
+		        std::cout<<std::endl;
+            }
+	        while((row = mysql_fetch_row(res) ) !=NULL)
+	        {
+		        std::cout<<row[0]<< " | "<<row[1]<< " | "<<row[2]<< " | "<<row[3]<< " | "<<row[4]<< " | ";
+		        std::cout<<std::endl;
+	        }
+	        std::cout<<"----------------------------------------------------------------------------------\n";
+
+            return true;
+        }
+
+        std::string GenerateSessionID() {
+            // 实现生成唯一 session ID 的逻辑
+            std::string val("1000");
+            return std::move(val);
+        }
+
         asio::ip::tcp::socket socket_;
         asio::streambuf request_;
+
+        // for sql
+        MYSQL *con;
+    };
+
+    struct SessionInfo {
+        std::string username;
+        // 其他会话相关信息
     };
 
     int port_;
     asio::ip::tcp::acceptor acceptor_;
     asio::ip::tcp::socket socket_;
+
+    std::unordered_map<std::string, SessionInfo> sessions; // for active sessions
+    std::mutex session_mutex;
+
+    // MariaDB
+    MYSQL *con;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	struct connection_details mysqlD;
 };
